@@ -22,6 +22,7 @@ type ComposedArrayItems = React.FC<
   React.PropsWithChildren<
     React.HTMLAttributes<HTMLDivElement> & {
       onSortEnd?: (oldIndex: number, newIndex: number) => void
+      disableSort?: boolean
     }
   >
 > &
@@ -79,6 +80,7 @@ export const ArrayItems: ComposedArrayItems = observer((props) => {
   const schema = useFieldSchema()
   const addition = useAddition()
   const dataSource = Array.isArray(field.value) ? field.value : []
+  const { disableSort = false } = props
   if (!schema) throw new Error('can not found schema object')
   return (
     <ArrayBase>
@@ -109,7 +111,11 @@ export const ArrayItems: ComposedArrayItems = observer((props) => {
                 index={index}
                 record={() => field.value?.[index]}
               >
-                <SortableItem key={`item-${index}`} index={index}>
+                <SortableItem
+                  disabled={disableSort}
+                  key={`item-${index}`}
+                  index={index}
+                >
                   <div className={`${prefixCls}-item-inner`}>
                     <RecursionField schema={items} name={index} />
                   </div>

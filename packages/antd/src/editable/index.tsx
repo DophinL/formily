@@ -15,7 +15,9 @@ type IPopoverProps = PopoverProps
 
 type ComposedEditable = React.FC<React.PropsWithChildren<IFormItemProps>> & {
   Popover?: React.FC<
-    React.PropsWithChildren<IPopoverProps & { title?: React.ReactNode }>
+    React.PropsWithChildren<
+      IPopoverProps & { title?: React.ReactNode; onClose?: () => void }
+    >
   >
 }
 
@@ -150,6 +152,8 @@ Editable.Popover = observer((props) => {
       if (errors?.length) return
       setVisible(false)
     }
+
+    props?.onClose?.()
   }
   const openPopover = () => {
     setVisible(true)
