@@ -137,7 +137,7 @@ export const Editable: ComposedEditable = observer((props) => {
 Editable.Popover = observer((props) => {
   const field = useField<Field>()
   const pattern = useParentPattern()
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(props.defaultVisible ?? false)
   const prefixCls = usePrefixCls('formily-editable')
   const closePopover = async () => {
     try {

@@ -1,5 +1,5 @@
 import React, { createContext, MouseEvent, useContext } from 'react'
-import { Button } from 'antd'
+import { Button, Popconfirm, PopconfirmProps } from 'antd'
 import {
   DeleteOutlined,
   DownOutlined,
@@ -27,7 +27,9 @@ import cls from 'classnames'
 type RemoveIconProps = Omit<AntdIconProps, 'onClick'> & {
   index?: number
   className?: string
-  onClick?: (event: MouseEvent, field: GeneralField) => Promise<any> | void
+  onConfirm?: (event: MouseEvent, field: GeneralField) => Promise<any> | void
+  showPopconfirm?: boolean
+  popconfirmProps?: PopconfirmProps
 }
 
 export interface IArrayBaseAdditionProps extends ButtonProps {
@@ -215,6 +217,7 @@ ArrayBase.Copy = React.forwardRef((props, ref) => {
   const prefixCls = usePrefixCls('formily-array-base')
   if (!array) return null
   if (array.field?.pattern !== 'editable') return null
+
   return (
     <CopyOutlined
       {...props}
@@ -241,13 +244,45 @@ ArrayBase.Copy = React.forwardRef((props, ref) => {
 })
 
 ArrayBase.Remove = React.forwardRef((props, ref) => {
-  const { onClick, ...otherProps } = props
+  const {
+    onConfirm,
+    showPopconfirm = false,
+    popconfirmProps,
+    ...otherProps
+  } = props
   const index = useIndex(props.index)
   const self = useField()
   const array = useArray()
   const prefixCls = usePrefixCls('formily-array-base')
   if (!array) return null
   if (array.field?.pattern !== 'editable') return null
+
+  if (showPopconfirm) {
+    return (
+      <Popconfirm
+        {...popconfirmProps}
+        disabled={self?.disabled}
+        onConfirm={(e) => {
+          const ret = onConfirm?.(e, self)
+          Promise.resolve(ret).then(() => {
+            array.field?.remove?.(index)
+            array.props?.onRemove?.(index)
+          })
+        }}
+      >
+        <DeleteOutlined
+          {...otherProps}
+          className={cls(
+            `${prefixCls}-remove`,
+            self?.disabled ? `${prefixCls}-remove-disabled` : '',
+            props.className
+          )}
+          ref={ref}
+        />
+      </Popconfirm>
+    )
+  }
+
   return (
     <DeleteOutlined
       {...otherProps}
@@ -257,10 +292,10 @@ ArrayBase.Remove = React.forwardRef((props, ref) => {
         props.className
       )}
       ref={ref}
-      onClick={async (e) => {
+      onClick={(e) => {
         if (self?.disabled) return
         e.stopPropagation()
-        const ret = onClick?.(e, self)
+        const ret = onConfirm?.(e, self)
         Promise.resolve(ret).then(() => {
           array.field?.remove?.(index)
           array.props?.onRemove?.(index)
