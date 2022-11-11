@@ -19,7 +19,11 @@ import { usePrefixCls } from '../__builtins__'
 import { ArrayBase, ArrayBaseMixins } from '../array-base'
 
 type ComposedArrayItems = React.FC<
-  React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>
+  React.PropsWithChildren<
+    React.HTMLAttributes<HTMLDivElement> & {
+      onSortEnd?: (oldIndex: number, newIndex: number) => void
+    }
+  >
 > &
   ArrayBaseMixins & {
     Item?: React.FC<
@@ -88,7 +92,11 @@ export const ArrayItems: ComposedArrayItems = observer((props) => {
           lockAxis="y"
           helperClass={`${prefixCls}-sort-helper`}
           onSortEnd={({ oldIndex, newIndex }) => {
-            field.move(oldIndex, newIndex)
+            const ret = props?.onSortEnd?.(oldIndex, newIndex)
+
+            Promise.resolve(ret).then(() => {
+              field.move(oldIndex, newIndex)
+            })
           }}
         >
           {dataSource?.map((item, index) => {

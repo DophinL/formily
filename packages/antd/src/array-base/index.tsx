@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react'
+import React, { createContext, MouseEvent, useContext } from 'react'
 import { Button } from 'antd'
 import {
   DeleteOutlined,
@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons'
 import { AntdIconProps } from '@ant-design/icons/lib/components/AntdIcon'
 import { ButtonProps } from 'antd/lib/button'
-import { ArrayField } from '@formily/core'
+import { ArrayField, GeneralField } from '@formily/core'
 import {
   useField,
   useFieldSchema,
@@ -23,6 +23,12 @@ import { isValid, clone } from '@formily/shared'
 import { SortableHandle } from 'react-sortable-hoc'
 import { usePrefixCls } from '../__builtins__'
 import cls from 'classnames'
+
+type RemoveIconProps = Omit<AntdIconProps, 'onClick'> & {
+  index?: number
+  className?: string
+  onClick?: (event: MouseEvent, field: GeneralField) => Promise<any> | void
+}
 
 export interface IArrayBaseAdditionProps extends ButtonProps {
   title?: string
@@ -44,7 +50,7 @@ export interface IArrayBaseItemProps {
 export type ArrayBaseMixins = {
   Addition?: React.FC<React.PropsWithChildren<IArrayBaseAdditionProps>>
   Copy?: React.FC<React.PropsWithChildren<AntdIconProps & { index?: number }>>
-  Remove?: React.FC<React.PropsWithChildren<AntdIconProps & { index?: number }>>
+  Remove?: React.FC<React.PropsWithChildren<RemoveIconProps>>
   MoveUp?: React.FC<React.PropsWithChildren<AntdIconProps & { index?: number }>>
   MoveDown?: React.FC<
     React.PropsWithChildren<AntdIconProps & { index?: number }>
@@ -235,6 +241,7 @@ ArrayBase.Copy = React.forwardRef((props, ref) => {
 })
 
 ArrayBase.Remove = React.forwardRef((props, ref) => {
+  const { onClick, ...otherProps } = props
   const index = useIndex(props.index)
   const self = useField()
   const array = useArray()
@@ -243,21 +250,21 @@ ArrayBase.Remove = React.forwardRef((props, ref) => {
   if (array.field?.pattern !== 'editable') return null
   return (
     <DeleteOutlined
-      {...props}
+      {...otherProps}
       className={cls(
         `${prefixCls}-remove`,
         self?.disabled ? `${prefixCls}-remove-disabled` : '',
         props.className
       )}
       ref={ref}
-      onClick={(e) => {
+      onClick={async (e) => {
         if (self?.disabled) return
         e.stopPropagation()
-        array.field?.remove?.(index)
-        array.props?.onRemove?.(index)
-        if (props.onClick) {
-          props.onClick(e)
-        }
+        const ret = onClick?.(e, self)
+        Promise.resolve(ret).then(() => {
+          array.field?.remove?.(index)
+          array.props?.onRemove?.(index)
+        })
       }}
     />
   )
