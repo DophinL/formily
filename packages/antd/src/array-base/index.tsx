@@ -1,4 +1,10 @@
-import React, { createContext, MouseEvent, useContext } from 'react'
+import React, {
+  createContext,
+  CSSProperties,
+  MouseEvent,
+  ReactNode,
+  useContext,
+} from 'react'
 import { Button, Popconfirm, PopconfirmProps } from 'antd'
 import {
   DeleteOutlined,
@@ -60,7 +66,11 @@ export type ArrayBaseMixins = {
   SortHandle?: React.FC<
     React.PropsWithChildren<AntdIconProps & { index?: number }>
   >
-  Index?: React.FC
+  Index?: React.FC<{
+    className?: string
+    style?: CSSProperties
+    render?: (index: number) => ReactNode
+  }>
   useArray?: () => IArrayBaseContext
   useIndex?: (index?: number) => number
   useRecord?: (record?: number) => any
@@ -162,12 +172,17 @@ ArrayBase.SortHandle = (props) => {
   return <SortHandle {...props} />
 }
 
+const indexDefaultRender = (index: number) => `${index + 1}.`
 ArrayBase.Index = (props) => {
   const index = useIndex()
   const prefixCls = usePrefixCls('formily-array-base')
+
   return (
-    <span {...props} className={`${prefixCls}-index`}>
-      #{index + 1}.
+    <span
+      {...props}
+      className={cls(`${prefixCls}-index`, props.className || '')}
+    >
+      {props?.render?.(index) || indexDefaultRender(index)}
     </span>
   )
 }

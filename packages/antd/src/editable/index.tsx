@@ -16,7 +16,12 @@ type IPopoverProps = PopoverProps
 type ComposedEditable = React.FC<React.PropsWithChildren<IFormItemProps>> & {
   Popover?: React.FC<
     React.PropsWithChildren<
-      IPopoverProps & { title?: React.ReactNode; onClose?: () => void }
+      IPopoverProps & {
+        title?: React.ReactNode
+        onClose?: (field: Field) => void
+        onOpen?: (field: Field) => void
+        triggerText?: string
+      }
     >
   >
 }
@@ -70,11 +75,13 @@ export const Editable: ComposedEditable = observer((props) => {
   const prefixCls = usePrefixCls('formily-editable')
   const ref = useRef<boolean>()
   const innerRef = useRef<HTMLDivElement>()
+
   const recover = () => {
     if (ref.current && !field?.errors?.length) {
       setEditable(false)
     }
   }
+
   const renderEditHelper = () => {
     if (editable) return
     return (
@@ -153,10 +160,11 @@ Editable.Popover = observer((props) => {
       setVisible(false)
     }
 
-    props?.onClose?.()
+    props?.onClose?.(field)
   }
   const openPopover = () => {
     setVisible(true)
+    props?.onOpen?.(field)
   }
   return (
     <Popover
@@ -178,9 +186,7 @@ Editable.Popover = observer((props) => {
       <div>
         <BaseItem className={`${prefixCls}-trigger`}>
           <div className={`${prefixCls}-content`}>
-            <span className={`${prefixCls}-preview`}>
-              {props.title || field.title}
-            </span>
+            <span className={`${prefixCls}-preview`}>{props.triggerText}</span>
             {pattern === 'editable' && (
               <EditOutlined className={`${prefixCls}-edit-btn`} />
             )}
