@@ -158,6 +158,7 @@ const SortHandle = SortableHandle((props: any) => {
   const prefixCls = usePrefixCls('formily-array-base')
   return (
     <MenuOutlined
+      color="#999999"
       {...props}
       className={cls(`${prefixCls}-sort-handle`, props.className)}
       style={{ ...props.style }}
@@ -286,6 +287,7 @@ ArrayBase.Remove = React.forwardRef((props, ref) => {
         }}
       >
         <DeleteOutlined
+          color="#666666"
           {...otherProps}
           className={cls(
             `${prefixCls}-remove`,
@@ -300,6 +302,7 @@ ArrayBase.Remove = React.forwardRef((props, ref) => {
 
   return (
     <DeleteOutlined
+      color="#666666"
       {...otherProps}
       className={cls(
         `${prefixCls}-remove`,

@@ -40,7 +40,8 @@
     "version:preminor": "lerna version preminor --preid beta",
     "version:major": "lerna version major",
     "release:force": "lerna publish from-package --yes",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build-antd": "npx lerna run build --scope everxyz-formily-antd"
   },
   "resolutions": {
     "@types/react": "^18.0.0",
